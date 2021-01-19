@@ -62,8 +62,8 @@ FORCE_INLINE void _draw_heater_status(const uint8_t x, const int8_t heater, cons
 
       if (blink || !is_idle)
     #endif
-        _draw_centered_temp(0.5f + ( 
-        #if HAS_HEATED_BED
+        _draw_centered_temp(0.5f + (
+            #if HAS_HEATED_BED
               isBed ? thermalManager.degTargetBed() :
             #endif
             thermalManager.degTargetHotend(heater)
@@ -71,8 +71,8 @@ FORCE_INLINE void _draw_heater_status(const uint8_t x, const int8_t heater, cons
         );
   }
 
-  if (PAGE_CONTAINS(21, 28)) {   
-  	_draw_centered_temp(0.5f + (
+  if (PAGE_CONTAINS(21, 28)) {
+    _draw_centered_temp(0.5f + (
         #if HAS_HEATED_BED
           isBed ? thermalManager.degBed() :
         #endif
@@ -87,7 +87,8 @@ FORCE_INLINE void _draw_heater_status(const uint8_t x, const int8_t heater, cons
         #if HAS_HEATED_BED
           isBed ? thermalManager.isHeatingBed() :
         #endif
-        thermalManager.isHeatingHotend(heater)  ) {
+        thermalManager.isHeatingHotend(heater)
+      ) {
         u8g.setColorIndex(0); // white on black
         u8g.drawBox(x + h, y, 2, 2);
         u8g.setColorIndex(1); // black on white
@@ -245,8 +246,8 @@ static void lcd_implementation_status_screen() {
           blink && fanSpeeds[0] ? status_screen1_bmp :
         #endif
       #endif
-      status_screen0_bmp  //this is the pictrue daxiong
-      );
+      status_screen0_bmp
+    );
 
   }
 
@@ -257,7 +258,8 @@ static void lcd_implementation_status_screen() {
   if (PAGE_UNDER(28)) {
     // Extruders
     HOTEND_LOOP() _draw_heater_status(STATUS_SCREEN_HOTEND_TEXT_X(e), e, blink);
-	// Heated bed
+
+    // Heated bed
     #if HOTENDS < 4 && HAS_HEATED_BED
       _draw_heater_status(STATUS_SCREEN_BED_TEXT_X, -1, blink);
     #endif
@@ -269,8 +271,8 @@ static void lcd_implementation_status_screen() {
         if (per) {
           u8g.setPrintPos(STATUS_SCREEN_FAN_TEXT_X, STATUS_SCREEN_FAN_TEXT_Y);
           lcd_print(itostr3(per));
-          u8g.print('%'); 
-		}
+          u8g.print('%');
+        }
       }
     #endif
   }
@@ -384,8 +386,8 @@ static void lcd_implementation_status_screen() {
     strcpy(ystring, ftostr4sign(LOGICAL_Y_POSITION(current_position[Y_AXIS])));
     strcpy(zstring, ftostr52sp(LOGICAL_Z_POSITION(current_position[Z_AXIS])));
     #if ENABLED(FILAMENT_LCD_DISPLAY)
-      strcpy(wstring, ftostr12ns(filament_width_meas)); 
-	strcpy(mstring, itostr3(100.0 * (
+      strcpy(wstring, ftostr12ns(filament_width_meas));
+      strcpy(mstring, itostr3(100.0 * (
           parser.volumetric_enabled
             ? planner.volumetric_area_nominal / planner.volumetric_multiplier[FILAMENT_SENSOR_EXTRUDER_NUM]
             : planner.volumetric_multiplier[FILAMENT_SENSOR_EXTRUDER_NUM]
@@ -408,7 +410,7 @@ static void lcd_implementation_status_screen() {
         u8g.setColorIndex(0); // white on black
       #endif
 
-      u8g.setPrintPos(0 * XYZ_SPACING + X_LABEL_POS, XYZ_BASELINE);  //xyz三轴的坐标
+      u8g.setPrintPos(0 * XYZ_SPACING + X_LABEL_POS, XYZ_BASELINE);
       lcd_printPGM(PSTR(MSG_X));
       u8g.setPrintPos(0 * XYZ_SPACING + X_VALUE_POS, XYZ_BASELINE);
       _draw_axis_value(X_AXIS, xstring, blink);
@@ -440,7 +442,7 @@ static void lcd_implementation_status_screen() {
 
     lcd_setFont(FONT_STATUSMENU);
     u8g.setPrintPos(12, 50);
-    lcd_print(itostr3(feedrate_percentage)); //打印机速度 daxiog
+    lcd_print(itostr3(feedrate_percentage));
     u8g.print('%');
 
     //
@@ -484,7 +486,7 @@ static void lcd_implementation_status_screen() {
       }
     #else
       lcd_implementation_status_message(blink);
-	#endif
+    #endif
   }
 }
 

@@ -93,6 +93,10 @@
   #elif ENABLED(DISPLAY_CHARSET_ISO10646_KANA)
     #include "dogm_font_data_ISO10646_Kana.h"
     #define FONT_MENU_NAME ISO10646_Kana_5x7
+  #elif ENABLED(DISPLAY_CHARSET_ISO10646_KO_KR)
+    #include "dogm_font_data_ISO10646_ko_KR.h"
+    #define FONT_MENU_NAME ISO10646_ko_KR
+    #define TALL_FONT_CORRECTION 1
   #elif ENABLED(DISPLAY_CHARSET_ISO10646_GREEK)
     #include "dogm_font_data_ISO10646_Greek.h"
     #define FONT_MENU_NAME ISO10646_Greek_5x7
@@ -166,7 +170,7 @@
   U8GLIB_ST7920_128X64_RRD u8g(0); // Number of stripes can be adjusted in ultralcd_st7920_u8glib_rrd.h with PAGE_HEIGHT
 #elif ENABLED(CARTESIO_UI)
   // The CartesioUI display
-  #if DOGLCD_MOSI != -1 && DOGLCD_SCK != -1
+  #if defined(DOGLCD_MOSI) && DOGLCD_MOSI > -1 && defined(DOGLCD_SCK) && DOGLCD_SCK > -1
     // using SW-SPI
     //U8GLIB_DOGM128 u8g(DOGLCD_SCK, DOGLCD_MOSI, DOGLCD_CS, DOGLCD_A0);  // 8 stripes
     U8GLIB_DOGM128_2X u8g(DOGLCD_SCK, DOGLCD_MOSI, DOGLCD_CS, DOGLCD_A0); // 4 stripes
@@ -204,8 +208,14 @@
   U8GLIB_SSD1309_128X64 u8g(U8G_I2C_OPT_NONE | U8G_I2C_OPT_FAST);
 #elif ENABLED(MINIPANEL)
   // The MINIPanel display
-  //U8GLIB_MINI12864 u8g(DOGLCD_CS, DOGLCD_A0);  // 8 stripes
-  U8GLIB_MINI12864_2X u8g(DOGLCD_CS, DOGLCD_A0); // 4 stripes
+  #if defined(DOGLCD_MOSI) && DOGLCD_MOSI > -1 && defined(DOGLCD_SCK) && DOGLCD_SCK > -1
+    // using SW-SPI
+    //U8GLIB_MINI12864 u8g(DOGLCD_SCK, DOGLCD_MOSI, DOGLCD_CS, DOGLCD_A0);  // 8 stripes
+    U8GLIB_MINI12864_2X u8g(DOGLCD_SCK, DOGLCD_MOSI, DOGLCD_CS, DOGLCD_A0); // 4 stripes
+  #else
+    //U8GLIB_MINI12864 u8g(DOGLCD_CS, DOGLCD_A0);  // 8 stripes
+    U8GLIB_MINI12864_2X u8g(DOGLCD_CS, DOGLCD_A0); // 4 stripes
+  #endif
 #else
   // for regular DOGM128 display with HW-SPI
   //U8GLIB_DOGM128 u8g(DOGLCD_CS, DOGLCD_A0);  // HW-SPI Com: CS, A0  // 8 stripes
@@ -302,8 +312,6 @@ void lcd_printPGM_utf(const char *str, uint8_t n=LCD_WIDTH) {
           if (right < LCD_PIXEL_WIDTH) u8g.drawBox(right, top, LCD_PIXEL_WIDTH - right, CUSTOM_BOOTSCREEN_BMPHEIGHT);
           if (bottom < LCD_PIXEL_HEIGHT) u8g.drawBox(0, bottom, LCD_PIXEL_WIDTH, LCD_PIXEL_HEIGHT - bottom);
         #endif
-            lcd_setFont(FONT_MENU_EDIT);
-          u8g.drawStr(50, 60, STRING_SPLASH_LINE1);
       } while (u8g.nextPage());
       safe_delay(CUSTOM_BOOTSCREEN_TIMEOUT);
     }
@@ -314,7 +322,7 @@ void lcd_printPGM_utf(const char *str, uint8_t n=LCD_WIDTH) {
     #if ENABLED(SHOW_CUSTOM_BOOTSCREEN)
       lcd_custom_bootscreen();
     #endif
-/*
+
     constexpr uint8_t offy =
       #if ENABLED(START_BMPHIGH)
         (LCD_PIXEL_HEIGHT - (START_BMPHEIGHT)) / 2
@@ -341,7 +349,6 @@ void lcd_printPGM_utf(const char *str, uint8_t n=LCD_WIDTH) {
       #endif
     } while (u8g.nextPage());
     safe_delay(BOOTSCREEN_TIMEOUT);
-	*/
   }
 
 #endif // SHOW_BOOTSCREEN

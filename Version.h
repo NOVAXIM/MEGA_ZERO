@@ -35,7 +35,7 @@
   /**
    * Marlin release version identifier
    */
-  #define SHORT_BUILD_VERSION "V0.0.4"
+  #define SHORT_BUILD_VERSION "V0.0.5"
 
   /**
    * Verbose version identifier which should contain a reference to the location
@@ -48,7 +48,7 @@
    * here we define this default string as the date where the latest release
    * version was tagged.
    */
-  #define STRING_DISTRIBUTION_DATE "2019-09-04"
+  #define STRING_DISTRIBUTION_DATE "2020-12-20"
 
   /**
    * Required minimum Configuration.h and Configuration_adv.h file versions.
@@ -71,11 +71,12 @@
    * Defines a generic printer name to be output to the LCD after booting Marlin.
    */
   #define MACHINE_NAME "3D Printer"
+  #define FULL_MACHINE_NAME "ANYCUBIC Mega Zero"
 
   /**
    * The SOURCE_CODE_URL is the location where users will find the Marlin Source
    * Code which is installed on the device. In most cases —unless the manufacturer
-   * has a distinct Github fork�?the Source Code URL should just be the main
+   * has a distinct Github fork— the Source Code URL should just be the main
    * Marlin repository.
    */
   #define SOURCE_CODE_URL "https://github.com/MarlinFirmware/Marlin"

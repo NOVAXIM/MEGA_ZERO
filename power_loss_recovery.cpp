@@ -111,7 +111,7 @@ extern uint8_t active_extruder, commands_in_queue, cmd_queue_index_r;
  * If a saved state exists, populate job_recovery_commands with
  * commands to restore the machine state and continue the file.
  */
-void check_print_job_recovery() {//查看是否有断电续打的文件
+void check_print_job_recovery() {
   memset(&job_recovery_info, 0, sizeof(job_recovery_info));
   ZERO(job_recovery_commands);
 
@@ -123,10 +123,10 @@ void check_print_job_recovery() {//查看是否有断电续打的文件
       SERIAL_PROTOCOLLNPAIR("Init job recovery info. Size: ", int(sizeof(job_recovery_info)));
     #endif
 
-    if (card.jobRecoverFileExists()) { //如果有断电续打的文件，
-      card.openJobRecoveryFile(true);   //打开文件
-      card.loadJobRecoveryInfo();       //下载信息
-      card.closeJobRecoveryFile();      //关闭文件
+    if (card.jobRecoverFileExists()) {
+      card.openJobRecoveryFile(true);
+      card.loadJobRecoveryInfo();
+      card.closeJobRecoveryFile();
       //card.removeJobRecoveryFile();
 
       if (job_recovery_info.valid_head && job_recovery_info.valid_head == job_recovery_info.valid_foot) {
@@ -136,18 +136,18 @@ void check_print_job_recovery() {//查看是否有断电续打的文件
         #if HAS_LEVELING
           strcpy_P(job_recovery_commands[ind++], PSTR("M420 S0 Z0"));               // Leveling off before G92 or G28
         #endif
-		
-        strcpy_P(job_recovery_commands[ind++], PSTR("G28 X Y"));                   // Ensure Z is equal to 0
-       // strcpy_P(job_recovery_commands[ind++], PSTR("G1 Z2"));                      // Raise Z by 2mm (we hope!)
-       /* strcpy_P(job_recovery_commands[ind++], PSTR("G28 R0"
+
+        strcpy_P(job_recovery_commands[ind++], PSTR("G92.0 Z0"));                   // Ensure Z is equal to 0
+        strcpy_P(job_recovery_commands[ind++], PSTR("G1 Z2"));                      // Raise Z by 2mm (we hope!)
+        strcpy_P(job_recovery_commands[ind++], PSTR("G28 R0"
           #if ENABLED(MARLIN_DEV_MODE)
             " S"
           #elif !IS_KINEMATIC
             " X Y"                                                                  // Home X and Y for Cartesian
           #endif
-        ));*/
+        ));
 
-        char str_1[16], str_2[16], str_3[16];
+        char str_1[16], str_2[16];
 
         #if HAS_LEVELING
           if (job_recovery_info.fade || job_recovery_info.leveling) {
@@ -158,13 +158,14 @@ void check_print_job_recovery() {//查看是否有断电续打的文件
           }
         #endif
 
-        dtostrf(job_recovery_info.current_position[Z_AXIS] , 1, 3, str_1);
-        dtostrf(job_recovery_info.current_position[E_AXIS] -5 , 1, 3, str_2 );
-		sprintf_P(job_recovery_commands[ind++], PSTR("G92 Z%s E%s"),str_1, str_2); // Current Z + 2 and E
-       // sprintf_P(job_recovery_commands[ind++], PSTR("G1 Z%s F3000"), str_1);
-		SERIAL_PROTOCOLLNPAIR("xxcmd: ", job_recovery_commands[ind-1]);
-
-		
+        dtostrf(job_recovery_info.current_position[Z_AXIS] + 2, 1, 3, str_1);
+        dtostrf(job_recovery_info.current_position[E_CART]
+          #if ENABLED(SAVE_EACH_CMD_MODE)
+            - 5
+          #endif
+          , 1, 3, str_2
+        );
+        sprintf_P(job_recovery_commands[ind++], PSTR("G92.0 Z%s E%s"), str_1, str_2); // Current Z + 2 and E
 
         uint8_t r = job_recovery_info.cmd_queue_index_r, c = job_recovery_info.commands_in_queue;
         while (c--) {
@@ -176,17 +177,15 @@ void check_print_job_recovery() {//查看是否有断电续打的文件
         sprintf_P(job_recovery_commands[ind++], PSTR("M23 %s"), job_recovery_info.sd_filename);
         sprintf_P(job_recovery_commands[ind++], PSTR("M24 S%ld T%ld"), job_recovery_info.sdpos, job_recovery_info.print_job_elapsed);
 
-
         job_recovery_commands_count = ind;
-		//SERIAL_PROTOCOLLNPAIR("cmd: ", job_recovery_commands[ind-2]);
-        //SERIAL_PROTOCOLLNPAIR("cmd: ", job_recovery_commands[ind-1]);
+
         #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
           debug_print_job_recovery(true);
         #endif
       }
       else {
         if (job_recovery_info.valid_head != job_recovery_info.valid_foot)
-         LCD_ALERTMESSAGEPGM("INVALID DATA");
+          LCD_ALERTMESSAGEPGM("INVALID DATA");
         memset(&job_recovery_info, 0, sizeof(job_recovery_info));
       }
     }
@@ -196,7 +195,7 @@ void check_print_job_recovery() {//查看是否有断电续打的文件
 /**
  * Save the current machine state to the power-loss recovery file
  */
-void save_job_recovery_info(float _z) {
+void save_job_recovery_info() {
   #if SAVE_INFO_INTERVAL_MS > 0
     static millis_t next_save_ms; // = 0;  // Init on reset
     millis_t ms = millis();
@@ -229,7 +228,6 @@ void save_job_recovery_info(float _z) {
     // Machine state
     COPY(job_recovery_info.current_position, current_position);
     job_recovery_info.feedrate = feedrate_mm_s;
-	job_recovery_info.current_position[2] = _z;
 
     #if HOTENDS > 1
       job_recovery_info.active_hotend = active_extruder;
@@ -278,7 +276,7 @@ void save_job_recovery_info(float _z) {
 
     // If power-loss pin was triggered, write just once then kill
     #if PIN_EXISTS(POWER_LOSS)
-      if (READ(POWER_LOSS_PIN) == POWER_LOSS_STATE) kill(MSG_POWER_LOSS_RECOVERY);
+      if (READ(POWER_LOSS_PIN) == POWER_LOSS_STATE) kill(PSTR(MSG_POWER_LOSS_RECOVERY));
     #endif
   }
 }
